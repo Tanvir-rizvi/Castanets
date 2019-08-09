@@ -87,10 +87,12 @@ std::unique_ptr<PosixFileDescriptorInfo> CreateDefaultPosixFilesToMap(
         base::SharedMemory::GetFdFromSharedMemoryHandle(shm));
   }
 
+#if !defined(CASTANETS)
   DCHECK(mojo_channel_remote_endpoint.is_valid());
   files_to_register->Share(
       service_manager::kMojoIPCChannel,
       mojo_channel_remote_endpoint.platform_handle().GetFD().get());
+#endif
 
   // TODO(jcivelli): remove this "if defined" by making
   // GetAdditionalMappedFilesForChildProcess a no op on Mac.

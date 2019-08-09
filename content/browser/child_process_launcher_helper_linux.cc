@@ -99,10 +99,24 @@ void ChildProcessLauncherHelper::BeforeLaunchOnClientThread() {
 std::unique_ptr<FileMappedForLaunch>
 ChildProcessLauncherHelper::GetFilesToMap() {
   DCHECK(CurrentlyOnProcessLauncherTaskRunner());
-  return CreateDefaultPosixFilesToMap(child_process_id(),
+  #if defined(CASTANETS)
+    if(!mojo_channel_.has_value()) {
+      return CreateDefaultPosixFilesToMap(child_process_id(),
+                                        mojo::PlatformChannelEndpoint(),
+                                        true /* include_service_required_files */,
+                                        GetProcessType(), command_line());
+    } else {
+      return CreateDefaultPosixFilesToMap(child_process_id(),
+                                    mojo_channel_->remote_endpoint(),
+                                    true /* include_service_required_files */,
+                                    GetProcessType(), command_line());
+    }
+  #else
+    return CreateDefaultPosixFilesToMap(child_process_id(),
                                       mojo_channel_->remote_endpoint(),
                                       true /* include_service_required_files */,
                                       GetProcessType(), command_line());
+  #endif
 }
 
 bool ChildProcessLauncherHelper::BeforeLaunchOnLauncherThread(
